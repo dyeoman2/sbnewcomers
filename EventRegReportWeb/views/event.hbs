@@ -1,78 +1,92 @@
 {{#if eventName}}
-    <h1>{{eventName}}</h1>
-    <h2>{{eventDate}}</h2>
-    <p class="newbie">&#x2605; - Newbie</p>
-    <table class="eventRegReport">
+  <h1>{{eventName}}</h1>
+  <h2>{{eventDate}}</h2>
+  <p class="newbie">&#x2605; - Newbie</p>
+  <table class="eventRegReport">
+    <tr>
+      <th>Check in</th>
+      <th>Registrant Name,<br />Email Address</th>
+      <th>Status,<br />Renewal Due, Level</th>
+      <th>Registration Type,<br />Amount Paid, Date</th>
+      <th>Payment Status</th>
+    </tr>
+    {{#if attendees}}
+      {{#each attendees}}
         <tr>
-            <th>Check in</th>
-            <th>Registrant Name,<br/>Email Address</th>
-            <th>Status,<br/>Renewal Due, Level</th>
-            <th>Registration Type,<br/>Amount Paid, Date</th>
-            <th>Payment Status</th>
+          <td class="checkin">&#9634;</td>
+          <td>
+            {{this.DisplayName}}
+            {{#if
+              (and
+                this.newbieStatus.Value (eq this.newbieStatus.Value.Label "Yes")
+              )
+            }}
+              &nbsp;&#x2605;
+            {{/if}}
+            <br /><a href="mailto:{{this.email}}">{{this.email}}</a>
+          </td>
+          <td>
+            <span class="em">{{this.contactInfo.Status}}&nbsp;member</span><br
+            />
+            {{this.renewDate}}<br />
+            {{this.contactInfo.MembershipLevel.Name}}
+          </td>
+          <td nowrap="nowrap">
+            <span
+              class="em"
+            >{{this.regType}}&nbsp;-&nbsp;{{this.regFee}}</span><br />
+            {{this.regDate}}
+            {{#if this.invoiceNumber}}
+              <br />Invoice #{this.invoiceNumber}}
+            {{/if}}
+          </td>
+          <td>{{this.paidStatus}}</td>
         </tr>
-        {{#if attendees}}
-            {{#each attendees}}
-                <tr>
-                    <td class="checkin">&#9634;</td>
-                    <td>
-                        {{this.DisplayName}}
-                        {{#if (and this.newbieStatus.Value (eq this.newbieStatus.Value.Label 'Yes'))}}
-                            &nbsp;&#x2605;
-                        {{/if}}
-                        <br><a href="mailto:{{this.email}}">{{this.email}}</a>
-                    </td>
-                    <td>
-                        <span class="em">{{this.contactInfo.Status}}&nbsp;member</span><br/>
-                        {{this.renewDate}}<br/>
-                        {{this.contactInfo.MembershipLevel.Name}}
-                    </td>
-                    <td nowrap="nowrap">
-                        <span class="em">{{this.regType}}&nbsp;-&nbsp;{{this.regFee}}</span><br/>
-                        {{this.regDate}}
-                        {{#if this.invoiceNumber}}
-                            <br/>Invoice #{this.invoiceNumber}}
-                        {{/if}}
-                    </td>
-                    <td>{{this.paidStatus}}</td>
-                </tr>
-                {{#if (and this.Memo (ne this.Memo ''))}}
-                    <tr class="memo"><td colspan="5">Note:&nbsp;{{this.Memo}}</td></tr>
-                {{/if}}
-            {{/each}}
+        {{#if (and this.Memo (ne this.Memo ""))}}
+          <tr class="memo"><td colspan="5">Note:&nbsp;{{this.Memo}}</td></tr>
         {{/if}}
-        {{#if waitlist}}
-            <tr><th colspan="5">Waitlist</th></tr>
-            {{#each waitlist}}
-                <tr>
-                    <td class="checkin">&#9634;</td>
-                    <td>
-                        {{this.DisplayName}}
-                        {{#if (and this.newbieStatus.Value (eq this.newbieStatus.Value.Label 'Yes'))}}
-                            &nbsp;&#x2605;
-                        {{/if}}
-                        <br><a href="mailto:{{this.email}}">{{this.email}}</a>
-                    </td>
-                    <td>
-                        <span class="em">{{this.contactInfo.Status}}&nbsp; member</span><br/>
-                        {{this.renewDate}}<br/>
-                        {{this.contactInfo.MembershipLevel.Name}}
-                    </td>
-                    <td nowrap="nowrap">
-                        <span class="em">{{this.regType}}&nbsp;-&nbsp;{{this.regFee}}</span><br/>
-                        {{this.regDate}}
-                        {{#if this.invoiceNumber}}
-                            <br/>Invoice #{this.invoiceNumber}}
-                        {{/if}}
-                    </td>
-                    <td>{{this.paidStatus}}</td>
-                </tr>
-                {{#if (and this.Memo (ne this.Memo ''))}}
-                    <tr class="memo"><td colspan="5">Note:&nbsp;{{this.Memo}}</td></tr>
-                {{/if}}
-            {{/each}}
+      {{/each}}
+    {{/if}}
+    {{#if waitlist}}
+      <tr><th colspan="5">Waitlist</th></tr>
+      {{#each waitlist}}
+        <tr>
+          <td class="checkin">&#9634;</td>
+          <td>
+            {{this.DisplayName}}
+            {{#if
+              (and
+                this.newbieStatus.Value (eq this.newbieStatus.Value.Label "Yes")
+              )
+            }}
+              &nbsp;&#x2605;
+            {{/if}}
+            <br /><a href="mailto:{{this.email}}">{{this.email}}</a>
+          </td>
+          <td>
+            <span class="em">{{this.contactInfo.Status}}&nbsp; member</span><br
+            />
+            {{this.renewDate}}<br />
+            {{this.contactInfo.MembershipLevel.Name}}
+          </td>
+          <td nowrap="nowrap">
+            <span
+              class="em"
+            >{{this.regType}}&nbsp;-&nbsp;{{this.regFee}}</span><br />
+            {{this.regDate}}
+            {{#if this.invoiceNumber}}
+              <br />Invoice #{this.invoiceNumber}}
+            {{/if}}
+          </td>
+          <td>{{this.paidStatus}}</td>
+        </tr>
+        {{#if (and this.Memo (ne this.Memo ""))}}
+          <tr class="memo"><td colspan="5">Note:&nbsp;{{this.Memo}}</td></tr>
         {{/if}}
-    </table>
+      {{/each}}
+    {{/if}}
+  </table>
 {{else}}
-    <h1>{{title}}</h1>
-    <p>{{error}}</p>
+  <h1>{{title}}</h1>
+  <p>{{error}}</p>
 {{/if}}

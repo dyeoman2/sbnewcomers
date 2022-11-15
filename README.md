@@ -4,15 +4,15 @@ Repository for all projects by SB Newcomers Technology committee members
 
 ## Requirements
 
-* [Node.js](https://nodejs.org/en/download/) v10.5.3 or later
-* NPM v6.4.1 or later
-* [Python](https://www.python.org/downloads/) 2.7.15 or later
-* Git v2.14 or later
+- [Node.js](https://nodejs.org/en/download/) v10.5.3 or later
+- NPM v6.4.1 or later
+- [Python](https://www.python.org/downloads/) 2.7.15 or later
+- Git v2.14 or later
 
 ## Prerequisites
 
-* You __***must***__ have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
-* Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) __***must***__ be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
+- You ****_must_**** have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
+- Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) ****_must_**** be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
 
 ## Linux Setup
 
@@ -70,17 +70,17 @@ Repository for all projects by SB Newcomers Technology committee members
 
 ## Scripts
 
-* [Alumni Renewal Due Update](./AlumniRenewalDueUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who 'graduated' in the past 24 hours and set the renewal date in the database to 730 days from the previous renewal date.
+- [Alumni Renewal Due Update](./AlumniRenewalDueUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who 'graduated' in the past 24 hours and set the renewal date in the database to 730 days from the previous renewal date.
 
-* [Database Update for Newbies (deprectaed)](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
+- [Database Update for Newbies (deprectaed)](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
 
-* [Export Events to Google Calendar](./ExportEventsToGCalendar) - A Node.js script that uses the WildApricot API to export calendar events and import them into a specified Google Calendar, allowing easier interaction using mobile devices. Currently used by Roy only.
+- [Export Events to Google Calendar](./ExportEventsToGCalendar) - A Node.js script that uses the WildApricot API to export calendar events and import them into a specified Google Calendar, allowing easier interaction using mobile devices. Currently used by Roy only.
 
-* [Friends of Newcomers Update](./FriendsOfNewcomersUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of FoN members who registered recently for open events and updates the renewal date for the member to avoid archiving.
+- [Friends of Newcomers Update](./FriendsOfNewcomersUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of FoN members who registered recently for open events and updates the renewal date for the member to avoid archiving.
 
-* [Member Since Field Copy (deprecated)](./MemberSinceFieldCopy) - A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
+- [Member Since Field Copy (deprecated)](./MemberSinceFieldCopy) - A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
 
-* [Newbie to Newcomer Update](./NewbieToNewcomerUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who have been active in the club for more than 90 day and change their membership level from "Newbie" to "Regular".
+- [Newbie to Newcomer Update](./NewbieToNewcomerUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who have been active in the club for more than 90 day and change their membership level from "Newbie" to "Regular".
 
 ## Scheduled Execution
 
