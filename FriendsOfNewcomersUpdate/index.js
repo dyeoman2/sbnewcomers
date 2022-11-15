@@ -1,50 +1,46 @@
 /*jshint esversion: 6 */
-const _ = require("lodash");
-const async = require("async");
-const path = require("path");
-const util = require("util");
-const aws = require("aws-sdk");
+const _ = require('lodash');
+const async = require('async');
+const path = require('path');
+const util = require('util');
+const aws = require('aws-sdk');
 
-aws.config.loadFromPath(path.join(__dirname, "..", "shared/aws.json"));
-const config = require(path.join(__dirname, "..", "shared/config.js"));
-const wildapricot = require(path.join(
-  __dirname,
-  "..",
-  "shared/wildapricot.js"
-));
+aws.config.loadFromPath(path.join(__dirname, '..', 'shared/aws.json'));
+const config = require(path.join(__dirname, '..', 'shared/config.js'));
+const wildapricot = require(path.join(__dirname, '..', 'shared/wildapricot.js'));
 
 // configure mail
-const emailTo = "HelpDesk@sbnewcomers.org";
+const emailTo = 'HelpDesk@sbnewcomers.org';
 //const emailTo = "rkiesler@gmail.com";
-const emailFrom = "HelpDesk@sbnewcomers.org";
+const emailFrom = 'HelpDesk@sbnewcomers.org';
 
 // configure logging
-var fs = require("fs");
-var logsDir = path.join(__dirname, "./logs");
+var fs = require('fs');
+var logsDir = path.join(__dirname, './logs');
 
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
-const bunyan = require("bunyan");
-const RotatingFileStream = require("bunyan-rotating-file-stream");
+const bunyan = require('bunyan');
+const RotatingFileStream = require('bunyan-rotating-file-stream');
 var log = bunyan.createLogger({
-  name: "fons_update",
+  name: 'fons_update',
   streams: [
     {
       stream: process.stderr,
-      level: "info",
+      level: 'info',
     },
     {
       stream: new RotatingFileStream({
-        path: path.join(__dirname, ".", "logs/fons_update.log"),
-        period: "1d", // daily rotation
+        path: path.join(__dirname, '.', 'logs/fons_update.log'),
+        period: '1d', // daily rotation
         totalFiles: 1000, // keep up to 1000 back copies
         rotateExisting: true, // Give ourselves a clean file when we start up, based on period
-        threshold: "1m", // Rotate log files larger than 1 megabyte
-        totalSize: "1g", // Don't keep more than 1gb of archived log files
+        threshold: '1m', // Rotate log files larger than 1 megabyte
+        totalSize: '1g', // Don't keep more than 1gb of archived log files
         gzip: true, // Compress the archive log files to save space
       }),
-      level: "trace",
+      level: 'trace',
     },
   ],
   level: bunyan.TRACE,
@@ -74,33 +70,30 @@ function getContacts(args, action) {
       // good response
       var resId;
       switch (contactData.State) {
-        case "Waiting":
-        case "Processing":
+        case 'Waiting':
+        case 'Processing':
           // asyncrounous request may take a few seconds to complete
           resId = contactData.ResultId;
           log.trace(
-            "Request processing (result ID: %s) ... keep checking for results every %d seconds",
+            'Request processing (result ID: %s) ... keep checking for results every %d seconds',
             resId,
             interval / 1000
           );
           setTimeout(getContacts, interval, args, action);
           break;
 
-        case "Complete":
+        case 'Complete':
           // process results
           if (!_.isNil(contactData.Contacts)) {
             if (_.isArray(contactData.Contacts)) {
-              log.trace(
-                "%d initial contacts retrieved",
-                contactData.Contacts.length
-              );
+              log.trace('%d initial contacts retrieved', contactData.Contacts.length);
             }
             if (contactData.Contacts.length > 0) {
               processContacts(
                 contactData.Contacts.filter(function (contact) {
                   return (
                     contact.FieldValues.filter(function (field) {
-                      return field.FieldName === "Membership enabled";
+                      return field.FieldName === 'Membership enabled';
                     })[0].Value == true
                   );
                 }),
@@ -111,7 +104,7 @@ function getContacts(args, action) {
             // query complete -- get the results (an extra API call)
             resId = contactData.ResultId;
             log.trace(
-              "Request complete (result ID: %s) -- retrieving contacts with action %s ...",
+              'Request complete (result ID: %s) -- retrieving contacts with action %s ...',
               resId,
               action
             );
@@ -121,7 +114,7 @@ function getContacts(args, action) {
           }
           break;
 
-        case "Failed":
+        case 'Failed':
           // query failed -- this should not happen unless the parameters were changed
           log.error(contactData);
           break;
@@ -138,7 +131,7 @@ function getContacts(args, action) {
 }
 
 // allowable actions
-const actions = ["updateRenewalDate"];
+const actions = ['updateRenewalDate'];
 var processed = 0;
 var updated = 0;
 var skipped = 0;
@@ -149,7 +142,7 @@ var errors = 0;
  *************************/
 const processContact = function (contact, index, callback) {
   log.trace(
-    "%d >>> Processing contact ID %s with renewal date %s",
+    '%d >>> Processing contact ID %s with renewal date %s',
     index + 1,
     contact.id,
     contact.renewalDate
@@ -168,119 +161,104 @@ const processContact = function (contact, index, callback) {
   /****************************************
    * Get the member's event registrations *
    ****************************************/
-  apiClient.methods.listContactEventRegs(
-    eventArgs,
-    function (eventRegsData, response) {
-      if (
-        !_.isNil(eventRegsData) &&
-        _.isArray(eventRegsData) &&
-        eventRegsData.length > 0
-      ) {
-        // sort the registrations by date
-        eventRegsData.sort(compareEventRegDates);
+  apiClient.methods.listContactEventRegs(eventArgs, function (eventRegsData, response) {
+    if (!_.isNil(eventRegsData) && _.isArray(eventRegsData) && eventRegsData.length > 0) {
+      // sort the registrations by date
+      eventRegsData.sort(compareEventRegDates);
 
-        // compare the latest event registration to the current renewal date
-        var latestRegDate = new Date(
-          eventRegsData[eventRegsData.length - 1].RegistrationDate
+      // compare the latest event registration to the current renewal date
+      var latestRegDate = new Date(eventRegsData[eventRegsData.length - 1].RegistrationDate);
+      var renewalDate = new Date(contact.renewalDate);
+
+      /*************************************
+       * TEST BLOCK for test user 47506410 *
+       *************************************/
+      //if (eventArgs.parameters.contactId == "47506410") {
+      //    renewalDate.setYear(latestRegDate.getYear() - 1);
+      //    log.trace("*** TEST CODE: Updated renewal date: %s", renewalDate);
+      //}
+      /******************
+       * END TEST BLOCK *
+       ******************/
+
+      if (latestRegDate > renewalDate) {
+        log.trace(
+          '%d >>> Updating renewal date to %s for %s %s (contact ID: %s)',
+          updated,
+          formatDate(latestRegDate),
+          contact.firstName,
+          contact.lastName,
+          contact.id
         );
-        var renewalDate = new Date(contact.renewalDate);
 
-        /*************************************
-         * TEST BLOCK for test user 47506410 *
-         *************************************/
-        //if (eventArgs.parameters.contactId == "47506410") {
-        //    renewalDate.setYear(latestRegDate.getYear() - 1);
-        //    log.trace("*** TEST CODE: Updated renewal date: %s", renewalDate);
-        //}
-        /******************
-         * END TEST BLOCK *
-         ******************/
+        const renewalUpdateArgs = {
+          path: {
+            accountId: config.accountId,
+            contactId: contact.id.toString(),
+          },
+          data: {
+            Id: contact.id,
+            FieldValues: [
+              {
+                FieldName: 'Renewal due',
+                SystemCode: contact.renewalDateSysCode,
+                Value: latestRegDate,
+              },
+            ],
+          },
+        };
 
-        if (latestRegDate > renewalDate) {
-          log.trace(
-            "%d >>> Updating renewal date to %s for %s %s (contact ID: %s)",
-            updated,
-            formatDate(latestRegDate),
-            contact.firstName,
-            contact.lastName,
-            contact.id
-          );
-
-          const renewalUpdateArgs = {
-            path: {
-              accountId: config.accountId,
-              contactId: contact.id.toString(),
-            },
-            data: {
-              Id: contact.id,
-              FieldValues: [
-                {
-                  FieldName: "Renewal due",
-                  SystemCode: contact.renewalDateSysCode,
-                  Value: latestRegDate,
-                },
-              ],
-            },
-          };
-
-          /*****************************
-           * Update the contact record *
-           *****************************/
-          apiClient.methods.updateContact(
-            renewalUpdateArgs,
-            function (contactDataUpd, response) {
-              if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
-                updated++;
-                log.trace(
-                  "%d >>> Renewal date successfully updated for %s %s (contact ID: %s)",
-                  index + 1,
-                  contactDataUpd.FirstName,
-                  contactDataUpd.LastName,
-                  contactDataUpd.Id
-                );
-                setTimeout(function () {
-                  callback();
-                }, 1000);
-              } else {
-                errors++;
-                const msg = util.format(
-                  "%d >>> Failed to %s renewal date for contact ID %s",
-                  index + 1,
-                  contact.action.substring(
-                    0,
-                    contact.action.indexOf("RenewalDate" + 1)
-                  ),
-                  contact.id
-                );
-                log.error(msg);
-                setTimeout(function () {
-                  callback();
-                }, 500);
-              }
-            }
-          );
-        } else {
-          skipped++;
-          log.trace(
-            "Skipping update for %s %s (contact ID: %s)",
-            contact.firstName,
-            contact.lastName,
-            contact.id
-          );
-          callback();
-        }
+        /*****************************
+         * Update the contact record *
+         *****************************/
+        apiClient.methods.updateContact(renewalUpdateArgs, function (contactDataUpd, response) {
+          if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
+            updated++;
+            log.trace(
+              '%d >>> Renewal date successfully updated for %s %s (contact ID: %s)',
+              index + 1,
+              contactDataUpd.FirstName,
+              contactDataUpd.LastName,
+              contactDataUpd.Id
+            );
+            setTimeout(function () {
+              callback();
+            }, 1000);
+          } else {
+            errors++;
+            const msg = util.format(
+              '%d >>> Failed to %s renewal date for contact ID %s',
+              index + 1,
+              contact.action.substring(0, contact.action.indexOf('RenewalDate' + 1)),
+              contact.id
+            );
+            log.error(msg);
+            setTimeout(function () {
+              callback();
+            }, 500);
+          }
+        });
       } else {
         skipped++;
         log.trace(
-          "No event registrations for %s %s (contact ID: %s)",
+          'Skipping update for %s %s (contact ID: %s)',
           contact.firstName,
           contact.lastName,
           contact.id
         );
         callback();
       }
+    } else {
+      skipped++;
+      log.trace(
+        'No event registrations for %s %s (contact ID: %s)',
+        contact.firstName,
+        contact.lastName,
+        contact.id
+      );
+      callback();
     }
-  );
+  });
 };
 
 const compareEventRegDates = function (regA, regB) {
@@ -297,36 +275,36 @@ const compareEventRegDates = function (regA, regB) {
  *************************/
 const processContacts = function (fons, action) {
   if (actions.indexOf(action) < 0) {
-    throw new Error(util.format("Unsupported action (%s)", action));
+    throw new Error(util.format('Unsupported action (%s)', action));
   }
 
   // This should match the results from the "Friends of Newcomers"
   // saved search in WildApricot
-  log.info("%d FoNs to process", fons.length);
+  log.info('%d FoNs to process', fons.length);
 
   // For each FoN
   var fonRecords = [];
   for (var n = 0; n < fons.length; n++) {
     var fon = fons[n];
     var renewalDate = fon.FieldValues.filter(function (field) {
-      return field.FieldName === "Renewal due";
+      return field.FieldName === 'Renewal due';
     })[0].Value;
     if (!_.isNil(renewalDate)) {
       renewalDate = renewalDate.substring(0, 10);
     }
     const renewalDueSysCode = fon.FieldValues.filter(function (field) {
-      return field.FieldName === "Renewal due";
+      return field.FieldName === 'Renewal due';
     })[0].SystemCode;
 
     switch (action) {
-      case "updateRenewalDate":
+      case 'updateRenewalDate':
         fonRecords.push({
           action: action,
           renewalDate: fon.FieldValues.filter(function (field) {
-            return field.FieldName == "Renewal due";
+            return field.FieldName == 'Renewal due';
           })[0].Value,
           status: fon.FieldValues.filter(function (field) {
-            return field.FieldName == "Membership status";
+            return field.FieldName == 'Membership status';
           })[0].Value.Label,
           renewalDateSysCode: renewalDueSysCode,
           firstName: fon.FirstName,
@@ -355,51 +333,49 @@ const processContacts = function (fons, action) {
             Message: {
               Body: {
                 Html: {
-                  Charset: "UTF-8",
+                  Charset: 'UTF-8',
                   Data: util.format(
-                    "<p>Renewal date checked for %d alum%s who registered for an open event:</p><ul><li>%d updated</li><li>%d skipped</li><li>%d error%s</li>",
+                    '<p>Renewal date checked for %d alum%s who registered for an open event:</p><ul><li>%d updated</li><li>%d skipped</li><li>%d error%s</li>',
                     processed,
-                    processed > 1 ? "ni" : processed == 1 ? "" : "ni",
+                    processed > 1 ? 'ni' : processed == 1 ? '' : 'ni',
                     updated,
                     skipped,
                     errors,
-                    errors == 1 ? "" : "s"
+                    errors == 1 ? '' : 's'
                   ),
                 },
                 Text: {
-                  Charset: "UTF-8",
+                  Charset: 'UTF-8',
                   Data: util.format(
-                    "Renewal date checked for %d alum%s who registered for an open event:\n%d updated\n%d skipped\n%d error%s",
+                    'Renewal date checked for %d alum%s who registered for an open event:\n%d updated\n%d skipped\n%d error%s',
                     processed,
-                    processed > 1 ? "ni" : processed == 1 ? "" : "ni",
+                    processed > 1 ? 'ni' : processed == 1 ? '' : 'ni',
                     updated,
                     skipped,
                     errors,
-                    errors == 1 ? "" : "s"
+                    errors == 1 ? '' : 's'
                   ),
                 },
               },
               Subject: {
-                Charset: "UTF-8",
-                Data: "Renewal Date Database Update for Existing Alumni",
+                Charset: 'UTF-8',
+                Data: 'Renewal Date Database Update for Existing Alumni',
               },
             },
             Source: emailFrom,
-            ReplyToAddresses: ["no-reply@sbnewcomers.org"],
+            ReplyToAddresses: ['no-reply@sbnewcomers.org'],
           };
 
           // Create the promise and SES service object
-          var sendPromise = new aws.SES({ apiVersion: "2010-12-01" })
-            .sendEmail(params)
-            .promise();
+          var sendPromise = new aws.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
           log.info(
-            "Renewal date processed for %d alum%s who recently registered for an open event with %d updated, %d skipped, and %d error%s",
+            'Renewal date processed for %d alum%s who recently registered for an open event with %d updated, %d skipped, and %d error%s',
             processed,
-            processed > 1 ? "ni" : processed == 1 ? "" : "ni",
+            processed > 1 ? 'ni' : processed == 1 ? '' : 'ni',
             updated,
             skipped,
             errors,
-            errors == 1 ? "" : "s"
+            errors == 1 ? '' : 's'
           );
 
           // Handle promise's fulfilled/rejected states
@@ -424,20 +400,20 @@ const processContacts = function (fons, action) {
 /*****************
  * Error handler *
  *****************/
-process.on("uncaughtException", (err) => {
+process.on('uncaughtException', (err) => {
   log.error(1, `${err}`);
 });
 
 // format date
 function formatDate(d) {
-  var month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
+  var month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
     year = d.getFullYear();
 
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
 
-  return [year, month, day].join("-");
+  return [year, month, day].join('-');
 }
 
 var today = new Date().toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
@@ -448,8 +424,7 @@ var today = new Date().toISOString().substring(0, 10); // keep the yyyy-mm-dd po
 const fonArgs = {
   path: { accountId: config.accountId },
   parameters: {
-    $select:
-      "'First name','Last name','Renewal due','Membership status','Membership enabled'",
+    $select: "'First name','Last name','Renewal due','Membership status','Membership enabled'",
     //$filter: "'Id' eq '47506410'"                   // Tester Newbie
     $filter: "'Membership level ID' eq '694456'", // Friends of Newcomers
   },
@@ -458,4 +433,4 @@ const fonArgs = {
 /***********
  * run it! *
  ***********/
-getContacts(fonArgs, "updateRenewalDate");
+getContacts(fonArgs, 'updateRenewalDate');

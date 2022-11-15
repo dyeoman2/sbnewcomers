@@ -11,8 +11,8 @@ Repository for all projects by SB Newcomers Technology committee members
 
 ## Prerequisites
 
-- You ****_must_**** have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
-- Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) ****_must_**** be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
+- You \***\*_must_\*\*** have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
+- Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) \***\*_must_\*\*** be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
 
 ## Linux Setup
 
@@ -52,7 +52,7 @@ Repository for all projects by SB Newcomers Technology committee members
 
    The values for `wildapricot_account_id` and `wildapricot_scope` should not change.
 
-   <kbd style="border: 1px solid; width: 600px;">![Authorized Application](/../screenshots/application.png?raw=true "Authorized Application")</kbd>
+   <kbd style="border: 1px solid; width: 600px;">![Authorized Application](/../screenshots/application.png?raw=true 'Authorized Application')</kbd>
 
    If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
 
