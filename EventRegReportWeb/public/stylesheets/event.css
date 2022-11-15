@@ -1,0 +1,78 @@
+/***********************
+ * Registration report *
+ **********************/
+.em {
+    color: #000;
+}
+
+.checkin {
+    text-align: center;
+    vertical-align: middle;
+}
+
+body {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+p {
+    text-align: center;
+}
+
+h1, h2 {
+    text-align: center;
+    font-size: 0.9em;
+}
+
+table.eventRegReport {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.eventRegReport, table.eventRegReport th, table.eventRegReport td  {
+    border: 1px solid;
+    border-collapse: collapse;
+    vertical-align: top;
+}
+
+table.eventRegReport, table.eventRegReport th {
+    font-size: 0.8em;
+}
+table.eventRegReport, table.eventRegReport td {
+    font-size: 0.9em;
+}
+
+table.eventRegReport th {
+    text-align: left;
+    vertical-align: top;
+    padding: 5px;
+    border-right: none;
+    border-left: none;
+}
+
+.trans {
+    border: none;
+}
+
+table.eventRegReport td {
+    color: #777;
+    border-bottom: none;
+    border-right: none;
+    border-left: none;
+    padding: 5px;
+}
+
+table.eventRegReport tr:last-child td {
+    border-bottom: 1px solid;
+}
+
+table.eventRegReport tr:last-child td {
+    border-right: none;
+}
+
+table.eventRegReport td:last-child {
+    border-left: none;
+}
+
+table.eventRegReport tr.memo td {
+    border-top: none;
+}
