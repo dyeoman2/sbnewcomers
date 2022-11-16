@@ -26,7 +26,7 @@ memory: 512 # Amount of memory in MiB used by the task.
 platform: linux/x86_64 # See https://aws.github.io/copilot-cli/docs/manifest/lb-web-service/#platform
 count: 1 # Number of tasks that should be running in your service.
 exec: true # Enable running commands in your container.
-
+env_file: .env
 # storage:
 # readonly_fs: true       # Limit to read-only access to mounted root filesystems.
 
@@ -38,6 +38,9 @@ exec: true # Enable running commands in your container.
 #secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
 #  GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of the SSM parameter.
 
+# secrets:
+#   AWS_ACCESS_KEY_ID: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/AWS_SECRET_ACCESS_KEY
 # You can override any of the values defined above by environment.
 #environments:
 #  test:

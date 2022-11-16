@@ -4,8 +4,9 @@ const async = require('async');
 const path = require('path');
 const util = require('util');
 const aws = require('aws-sdk');
+const awsConfig = require('../shared/aws.js');
 
-aws.config.loadFromPath(path.join(__dirname, '..', 'shared/aws.json'));
+aws.config.update(awsConfig);
 const config = require(path.join(__dirname, '..', 'shared/config.js'));
 const wildapricot = require(path.join(__dirname, '..', 'shared/wildapricot.js'));
 console.log(config);

@@ -2,8 +2,8 @@
 const path = require('path');
 const util = require('util');
 const aws = require('aws-sdk');
-
-aws.config.loadFromPath(path.join(__dirname, '..', 'shared/aws.json'));
+const awsConfig = require('../shared/aws.js');
+aws.config.update(awsConfig);
 
 // configure mail
 const emailTo = 'dysbnewcomers@gmail.com';
