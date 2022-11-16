@@ -11,6 +11,15 @@ app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });
 
+app.get('/', (req, res) => {
+  try {
+    return res.status(200).send('SB Newcomers Scripts');
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send(e.message);
+  }
+});
+
 app.get('/newbieToNewcomer', async (req, res) => {
   try {
     startNewbieToNewcomer(apiClient);
