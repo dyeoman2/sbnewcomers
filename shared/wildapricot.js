@@ -6,11 +6,12 @@ const _ = require('lodash');
 const async = require('async');
 const path = require('path');
 const Client = require('node-rest-client').Client;
+const config = require('./config');
 
 // configure logging
 const bunyan = require('bunyan');
 const RotatingFileStream = require('bunyan-rotating-file-stream');
-var log = bunyan.createLogger({
+const log = bunyan.createLogger({
   name: 'wildapricot',
   streams: [
     {
@@ -33,7 +34,7 @@ var log = bunyan.createLogger({
   level: bunyan.TRACE,
 });
 
-var options = {
+let options = {
     tokenHost: 'https://oauth.wildapricot.org',
     tokenEndpoint: '/auth/token',
     resourceHost: 'https://api.wildapricot.org',
@@ -44,8 +45,8 @@ var options = {
   scope = null,
   tokenExpiresAt = new Date();
 
-function authenticate(callback) {
-  var args = {
+const authenticate = (callback) => {
+  const args = {
     data: [
       'grant_type=password&username=',
       options.user,
@@ -71,20 +72,16 @@ function authenticate(callback) {
     }
     if (_.isFunction(callback)) callback();
   });
-}
+};
 
-function isTokenExpired() {
-  return new Date() > tokenExpiresAt;
-}
+const isTokenExpired = () => new Date() > tokenExpiresAt;
 
-function getHeaders() {
-  return {
-    Authorization: 'Bearer ' + accessToken,
-    'Content-Type': 'application/json',
-  };
-}
+const getHeaders = () => ({
+  Authorization: 'Bearer ' + accessToken,
+  'Content-Type': 'application/json',
+});
 
-function wrapMethods() {
+const wrapMethods = () => {
   // Wrap all of our registered WildApricot methods so we can silently inject the authentication headers
   _.each(client.methods, function (method, methodName) {
     client.methods[methodName] = _.wrap(method, function (originalMethod, args, callback) {
@@ -93,96 +90,84 @@ function wrapMethods() {
 
       async.series(
         [
-          function (cb) {
-            if (!accessToken || isTokenExpired()) {
-              authenticate(cb);
-            } else {
-              cb();
-            }
+          (cb) => {
+            if (!accessToken || isTokenExpired()) authenticate(cb);
+            else cb();
           },
-          function (cb) {
+          (cb) => {
             _.extend(args.headers, getHeaders());
             cb();
           },
         ],
-        function () {
-          originalMethod(args, callback);
-        }
+        () => originalMethod(args, callback)
       );
     });
   });
-}
+};
 
-function registerClientMethods() {
-  var baseURL = options.resourceHost + options.resourceEndpoint;
+const registerClientMethods = () => {
+  const baseURL = options.resourceHost + options.resourceEndpoint;
+  const accountURL = baseURL + '/accounts/${accountId}';
 
-  // Contacts: https://api.wildapricot.org/v2.1/accounts/:accountId/contacts/:contactId
-  client.registerMethod('listContacts', baseURL + '/accounts/${accountId}/contacts', 'GET');
-  client.registerMethod(
-    'listContact',
-    baseURL + '/accounts/${accountId}/contacts/${contactId}',
-    'GET'
-  );
-  client.registerMethod(
-    'updateContact',
-    baseURL + '/accounts/${accountId}/contacts/${contactId}',
-    'PUT'
-  );
+  // Contacts: https://app.swaggerhub.com/apis-docs/WildApricot/wild-apricot_public_api/7.24.0#/Contacts
+  const contactsURL = accountURL + '/contacts';
+  const contactURL = contactsURL + '/${contactId}';
+  client.registerMethod('listContacts', contactsURL, 'GET');
+  client.registerMethod('listContact', contactURL, 'GET');
+  client.registerMethod('updateContact', contactURL, 'PUT');
 
   // Event registrations: https://api.wildapricot.org/v2.1/accounts/:accountId/eventregistrations?eventId=:eventId
-  client.registerMethod(
-    'listEventRegs',
-    baseURL + '/accounts/${accountId}/eventregistrations',
-    'GET'
-  );
+  const eventRegistrationsURL = accountURL + '/eventregistrations';
+  client.registerMethod('listEventRegs', eventRegistrationsURL, 'GET');
 
+  // DAN THINKS THIS MAY BE POINTING TO THE WRONG ENDPOINT
   // Event registrations: https://api.wildapricot.org/v2.1/accounts/:accountId/eventregistrations?contactId=:contactId
-  client.registerMethod(
-    'listContactEventRegs',
-    baseURL + '/accounts/${accountId}/eventregistrations',
-    'GET'
-  );
+  client.registerMethod('listContactEventRegs', eventRegistrationsURL, 'GET');
 
   // Event: https://api.wildapricot.org/v2.1/accounts/:accountId/events/:eventId
-  client.registerMethod('listEvents', baseURL + '/accounts/${accountId}/events', 'GET');
-  client.registerMethod('listEvent', baseURL + '/accounts/${accountId}/events/${eventId}', 'GET');
+  const eventsURL = accountURL + '/events';
+  const eventURL = eventsURL + '/${eventId}';
+  client.registerMethod('listEvents', eventsURL, 'GET');
+  client.registerMethod('listEvent', eventURL, 'GET');
 
   // Invoice: https://api.wildapricot.org/v2.1/accounts/:accountId/Invoices/:invoiceId",
-  client.registerMethod(
-    'listInvoice',
-    baseURL + '/accounts/${accountId}/Invoices/${invoiceId}',
-    'GET'
-  );
+  const invoiceURL = accountURL + '/invoices/${invoiceId}';
+  client.registerMethod('listInvoice', invoiceURL, 'GET');
 
   // Membership levels: Invoice: https://api.wildapricot.org/v2.1/accounts/:accountId/MembershipLevels",
-  client.registerMethod(
-    'listMembershipLevels',
-    baseURL + '/accounts/${accountId}/MembershipLevels',
-    'GET'
-  );
+  const membershipLevelsURL = accountURL + '/membershiplevels';
+  client.registerMethod('listMembershipLevels', membershipLevelsURL, 'GET');
 
   wrapMethods();
-}
+};
 
-var exports = (module.exports = {});
+module.exports = {
+  init: () => {
+    const _options = {
+      account: config.accountId,
+      user: config.userId,
+      pass: config.password,
+      client: config.clientId,
+      secret: config.secret,
+      scope: config.scope,
+    };
+    const requiredOptions = ['user', 'pass', 'client', 'secret', 'scope'],
+      missingOptions = _.difference(requiredOptions, _.keys(_options));
 
-exports.init = function (_options) {
-  var requiredOptions = ['user', 'pass', 'client', 'secret', 'scope'],
-    missingOptions = _.difference(requiredOptions, _.keys(_options));
+    if (missingOptions.length) {
+      throw new Error('The following options are required: ' + missingOptions.join(', '));
+    }
 
-  if (missingOptions.length) {
-    throw new Error('The following options are required: ' + missingOptions.join(', '));
-  }
+    _.extend(options, _options);
 
-  _.extend(options, _options);
+    client = new Client({
+      user: _options.client,
+      password: _options.secret,
+    });
+    scope = _options.scope;
 
-  client = new Client({
-    user: _options.client,
-    password: _options.secret,
-  });
-  scope = _options.scope;
+    registerClientMethods();
 
-  registerClientMethods();
-
-  return client;
+    return client;
+  },
 };

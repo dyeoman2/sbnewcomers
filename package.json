@@ -1,0 +1,31 @@
+{
+  "name": "sbnewcomers",
+  "version": "1.0.0",
+  "description": "scripts to automate tasks in wildapricot for sbnewcomers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dyeoman2/sbnewcomers.git"
+  },
+  "author": "Roy Kiesler and Daniel Yeoman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dyeoman2/sbnewcomers/issues"
+  },
+  "homepage": "https://github.com/dyeoman2/sbnewcomers#readme",
+  "dependencies": {
+    "async": "^3.2.4",
+    "aws-sdk": "^2.1256.0",
+    "bunyan": "^1.8.15",
+    "bunyan-rotating-file-stream": "^2.0.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "lodash": "^4.17.21",
+    "node-rest-client": "^3.1.1",
+    "path": "^0.12.7"
+  }
+}

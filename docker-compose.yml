@@ -1,0 +1,13 @@
+version: '1.0'
+services:
+  dangles-video:
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+    volumes:
+      - ./:/app
+      - /app/node_modules/
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json

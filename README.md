@@ -74,14 +74,20 @@ Repository for all projects by SB Newcomers Technology committee members
 
 - [Database Update for Newbies (deprectaed)](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
 
-- [Export Events to Google Calendar](./ExportEventsToGCalendar) - A Node.js script that uses the WildApricot API to export calendar events and import them into a specified Google Calendar, allowing easier interaction using mobile devices. Currently used by Roy only.
-
 - [Friends of Newcomers Update](./FriendsOfNewcomersUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of FoN members who registered recently for open events and updates the renewal date for the member to avoid archiving.
-
-- [Member Since Field Copy (deprecated)](./MemberSinceFieldCopy) - A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
 
 - [Newbie to Newcomer Update](./NewbieToNewcomerUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who have been active in the club for more than 90 day and change their membership level from "Newbie" to "Regular".
 
 ## Scheduled Execution
 
 When using a task scheduler (e.g., `cron` on Linux) to execute scripts on a schedule, be mindful of the [WildApricot API limits](https://gethelp.wildapricot.com/en/articles/182#limits) which permit up to 60 calls per minute. Each individual script already takes that into account, but executing two or more scripts on an overlapping schedule will exceed the limits and result in API errors.
+
+## Docker commands
+
+```
+docker-compose up -d --build
+```
+
+```
+docker-compose down -v
+```

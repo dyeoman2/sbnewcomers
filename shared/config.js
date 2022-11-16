@@ -34,4 +34,3 @@ if (!isConfigured) {
 
 // Export configuration object
 module.exports = cfg;
-∏
