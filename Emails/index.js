@@ -3,6 +3,7 @@ const path = require('path');
 const util = require('util');
 const aws = require('aws-sdk');
 const awsConfig = require('../shared/aws.js');
+
 aws.config.update(awsConfig);
 
 // configure mail
