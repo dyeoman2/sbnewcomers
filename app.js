@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const { init: startNewbieToNewcomer } = require('./NewbieToNewcomerUpdate');
+const { alumniUpdates, newbieUpdates } = require('./NewbieToNewcomerUpdate');
 const wildapricot = require('./shared/wildapricot');
 
 const apiClient = wildapricot.init();
@@ -20,9 +20,10 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/newbieToNewcomer', async (req, res) => {
+app.get('/memberUpdates', async (req, res) => {
   try {
-    startNewbieToNewcomer(apiClient);
+    alumniUpdates(apiClient);
+    newbieUpdates(apiClient);
     return res.status(200).send('NewbieToNewcomer processing');
   } catch (e) {
     console.error(e);

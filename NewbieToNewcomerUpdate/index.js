@@ -271,7 +271,7 @@ const args = {
 };
 
 module.exports = {
-  init: (apiClient) => {
+  alumniUpdates: (apiClient) => {
     apiClientMethods = apiClient.methods;
     return apiClientMethods.listMembershipLevels(args, (levelData, response) => {
       if (!_.isNil(levelData)) {
@@ -287,23 +287,12 @@ module.exports = {
             });
           }
 
-          /***********************
-           * run the main script *
-           ***********************/
-          const newbieArgs = (membershipLevel) => ({
-            path: { accountId: accountId },
-            parameters: {
-              $select:
-                "'First name','Last name','Membership status','Membership enabled','Member since', 'Renewal due",
-              $filter:
-                "'Membership status' eq 'Active'" +
-                " AND 'Membership level ID' eq " +
-                lookupMembershipLevel(membershipLevel) +
-                " AND 'Renewal due' le '" +
-                todayPlus640 +
-                "'",
-            },
-          });
+          const alumniMembershipLevels = [
+            'ExtendedNewcomer',
+            'ExtendedNewcomer VU',
+            'NewcomerMember',
+            'NewcomerMember VU',
+          ];
 
           const alumniArgs = (membershipLevel) => ({
             path: { accountId: accountId },
@@ -320,25 +309,52 @@ module.exports = {
             },
           });
 
+          // Convert applicable members to Alumni
+          alumniMembershipLevels.forEach((level) => {
+            const args = alumniArgs(level);
+            getContacts(args, 'makeAlumniUpdate', apiClientMethods);
+          });
+        }
+      }
+    });
+  },
+  newbieUpdates: (apiClient) => {
+    apiClientMethods = apiClient.methods;
+    return apiClientMethods.listMembershipLevels(args, (levelData, response) => {
+      if (!_.isNil(levelData)) {
+        // good response
+        if (_.isArray(levelData)) {
+          log.trace('%d initial membership levels retrieved', levelData.length);
+        }
+        if (levelData.length > 0) {
+          for (const level of levelData) {
+            levels.push({
+              id: level.Id,
+              name: level.Name,
+            });
+          }
+
+          const newbieArgs = (membershipLevel) => ({
+            path: { accountId: accountId },
+            parameters: {
+              $select:
+                "'First name','Last name','Membership status','Membership enabled','Member since', 'Renewal due",
+              $filter:
+                "'Membership status' eq 'Active'" +
+                " AND 'Membership level ID' eq " +
+                lookupMembershipLevel(membershipLevel) +
+                " AND 'Renewal due' le '" +
+                todayPlus640 +
+                "'",
+            },
+          });
+
           const membershipLevels = ['NewbieNewcomer', 'NewbieNewcomer VU'];
 
           // Convert applicable Newbies to Newcomers
           membershipLevels.forEach((level) => {
             const args = newbieArgs(level);
             getContacts(args, 'newbieToNewcomerUpdate', apiClientMethods);
-          });
-
-          const alumniMembershipLevels = [
-            'ExtendedNewcomer',
-            'ExtendedNewcomer VU',
-            'NewcomerMember',
-            'NewcomerMember VU',
-          ];
-
-          // Convert applicable members to Alumni
-          alumniMembershipLevels.forEach((level) => {
-            const args = alumniArgs(level);
-            getContacts(args, 'makeAlumniUpdate', apiClientMethods);
           });
         }
       }

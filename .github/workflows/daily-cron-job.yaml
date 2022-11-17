@@ -13,7 +13,7 @@ jobs:
       - name: HTTP Request Action
         uses: fjogeleit/http-request-action@v1.12.0
         with:
-          url: 'http://sbnew-publi-1o4nxb30frlxf-351362560.us-east-2.elb.amazonaws.com/newbieToNewcomer'
+          url: 'http://sbnew-publi-1o4nxb30frlxf-351362560.us-east-2.elb.amazonaws.com/memberUpdates'
           method: 'GET'
           contentType: 'application/json'
           timeout: 60000
