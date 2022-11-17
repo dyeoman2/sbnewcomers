@@ -1,9 +1,8 @@
 name: WildApricot Daily CRON job
 
 on:
-  push
-  # schedule:
-  #   - cron: '0 10 * * *'
+  schedule:
+    - cron: '0 10 * * *'
 jobs:
   build:
     name: WildApricot Daily CRON job

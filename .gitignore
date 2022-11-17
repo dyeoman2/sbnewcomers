@@ -75,4 +75,3 @@ aws.rkiesler.json
 .DS_Store
 
 .metals/
-shared/.env.prod

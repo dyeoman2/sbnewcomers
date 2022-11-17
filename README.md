@@ -19,7 +19,7 @@ The CRON job runs every day at 10am UTC by the [Daily CRON Github Action](.githu
 
 1. Copy the file `.env_sample` to `.env`
 
-2. Update the `.env` file using the data shown the in AWS Login Info file in the shared shared Google Drive TECH folder. The actual .env file used by the application is in S3.
+2. Update the `.env` file using the data shown the in AWS Login Info file in the shared Google Drive TECH folder. The actual .env file used by the application is in S3.
 
    ```ini
    AWS_ACCESS_KEY_ID=<your_aws_acccess_key_id>

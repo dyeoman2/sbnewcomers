@@ -1,14 +1,9 @@
-/*jshint esversion: 6 */
-const path = require('path');
 const util = require('util');
-const aws = require('aws-sdk');
-const awsConfig = require('../shared/aws.js');
-
-aws.config.update(awsConfig);
+const { ses } = require('../lib/aws');
 
 // configure mail
-const emailTo = 'dysbnewcomers@gmail.com';
-const emailFrom = 'webmaster5@sbnewcomers.org';
+const emailTo = process.env.EMAIL_TO;
+const emailFrom = process.env.EMAIL_FROM;
 
 // Send email with results of updated membership
 const sendEmail = async ({ action, errors, log, memberRecords, processed, skipped, updated }) => {
@@ -68,7 +63,8 @@ const sendEmail = async ({ action, errors, log, memberRecords, processed, skippe
   };
 
   // Create the promise and SES service object
-  const sendPromise = new aws.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
+  const sendPromise = ses.sendEmail(params).promise();
+
   log.info(
     '%s processed for %d member%s with %d updated, %d skipped, and %d error%s',
     action,

@@ -1,12 +1,12 @@
-/*jshint esversion: 6 */
 const _ = require('lodash');
 const async = require('async');
 const path = require('path');
 const util = require('util');
 const fs = require('fs');
 
-const { sendEmail } = require('../Emails');
-const { accountId } = require(path.join(__dirname, '..', 'shared/config'));
+const { sendEmail } = require('../emails');
+
+const accountId = process.env.WILDAPRICOT_ACCOUNT_ID;
 
 // configure logging
 const logsDir = path.join(__dirname, './logs');

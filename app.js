@@ -1,15 +1,18 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const { alumniUpdates, newbieUpdates } = require('./NewbieToNewcomerUpdate');
-const wildapricot = require('./shared/wildapricot');
+require('dotenv').config();
 
-const apiClient = wildapricot.init();
+const { alumniUpdates, newbieUpdates } = require('./memberUpdates');
+const wildapricot = require('./wildApricot');
 
 // start express server on port 3000
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });
+
+// initialize wildapricot client
+const wildApricotApiClient = wildapricot.init();
 
 app.get('/', (req, res) => {
   try {
@@ -22,8 +25,8 @@ app.get('/', (req, res) => {
 
 app.get('/memberUpdates', async (req, res) => {
   try {
-    alumniUpdates(apiClient);
-    newbieUpdates(apiClient);
+    alumniUpdates(wildApricotApiClient);
+    newbieUpdates(wildApricotApiClient);
     return res.status(200).send('Member updates processing');
   } catch (e) {
     console.error(e);
