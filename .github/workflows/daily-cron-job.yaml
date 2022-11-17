@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: dev
+          ref: main
       - name: HTTP Request Action
-        uses: fjogeleit/http-request-action@v1.11.1
+        uses: fjogeleit/http-request-action@v1.12.0
         with:
           url: 'http://sbnew-publi-1o4nxb30frlxf-351362560.us-east-2.elb.amazonaws.com/newbieToNewcomer'
           method: 'GET'
