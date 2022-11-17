@@ -1,11 +1,12 @@
 name: WildApricot Daily CRON job
 
 on:
-  schedule:
-    - cron: '0 10 * * *'
+  push
+  # schedule:
+  #   - cron: '0 10 * * *'
 jobs:
   build:
-    name: FTP Processing HTTP Request
+    name: WildApricot Daily CRON job
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
