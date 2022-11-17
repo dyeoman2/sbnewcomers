@@ -152,42 +152,39 @@ const processContact = (contact, index, callback) => {
       },
     },
   };
-
-  console.log('levelUpdateArgs', levelUpdateArgs);
-  callback();
   /*****************************
    * Update the contact record *
    *****************************/
-  // apiClient.methods.updateContact(levelUpdateArgs, function (contactDataUpd, response) {
-  //   if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
-  //     updated++;
-  //     log.trace(
-  //       '%d >>> Membership level successfully updated to for %s %s (contact ID: %s)',
-  //       index + 1,
-  //       contactDataUpd.FirstName,
-  //       contactDataUpd.LastName,
-  //       contactDataUpd.Id
-  //     );
-  //     setTimeout(function () {
-  //       callback();
-  //     }, 1000);
-  //   } else {
-  //     errors++;
-  //     const msg = util.format(
-  //       '%d >>> Failed to update membership level for %s %s (contact ID %s) -- %s (%s)',
-  //       index + 1,
-  //       contact.firstName,
-  //       contact.lastName,
-  //       contact.id,
-  //       response.statusMessage,
-  //       response.statusCode
-  //     );
-  //     log.error(msg);
-  //     setTimeout(function () {
-  //       callback();
-  //     }, 1000);
-  //   }
-  // });
+  apiClient.methods.updateContact(levelUpdateArgs, (contactDataUpd, response) => {
+    if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
+      updated++;
+      log.trace(
+        '%d >>> Membership level successfully updated to for %s %s (contact ID: %s)',
+        index + 1,
+        contactDataUpd.FirstName,
+        contactDataUpd.LastName,
+        contactDataUpd.Id
+      );
+      setTimeout(function () {
+        callback();
+      }, 1000);
+    } else {
+      errors++;
+      const msg = util.format(
+        '%d >>> Failed to update membership level for %s %s (contact ID %s) -- %s (%s)',
+        index + 1,
+        contact.firstName,
+        contact.lastName,
+        contact.id,
+        response.statusMessage,
+        response.statusCode
+      );
+      log.error(msg);
+      setTimeout(function () {
+        callback();
+      }, 1000);
+    }
+  });
 };
 
 /*************************
@@ -248,17 +245,6 @@ const processContacts = (members, action) => {
  *****************/
 process.on('uncaughtException', (err) => log.error(1, `${err}`));
 
-/*******************************
- * set query filter parameters *
- *******************************/
-const today = new Date();
-today.setDate(today.getDate() + 641);
-const todayPlus640 = today.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
-const today2 = new Date();
-today2.setDate(today2.getDate() + 15);
-const todayPlus15 = today2.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
-console.log('Today + 640 days: ' + todayPlus640);
-
 /****************************
  * Membership levels lookup *
  ****************************/
@@ -287,6 +273,9 @@ module.exports = {
             });
           }
 
+          const today = new Date();
+          const todayIso = today.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
+
           const alumniMembershipLevels = [
             'ExtendedNewcomer',
             'ExtendedNewcomer VU',
@@ -304,7 +293,7 @@ module.exports = {
                 " AND 'Membership level ID' eq " +
                 lookupMembershipLevel(membershipLevel) +
                 " AND 'Renewal due' lt '" +
-                todayPlus15 +
+                todayIso +
                 "'",
             },
           });
@@ -333,6 +322,10 @@ module.exports = {
               name: level.Name,
             });
           }
+
+          const today = new Date();
+          today.setDate(today.getDate() + 641);
+          const todayPlus640 = today.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
 
           const newbieArgs = (membershipLevel) => ({
             path: { accountId: accountId },
