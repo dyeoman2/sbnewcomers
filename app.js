@@ -24,7 +24,7 @@ app.get('/memberUpdates', async (req, res) => {
   try {
     alumniUpdates(apiClient);
     newbieUpdates(apiClient);
-    return res.status(200).send('NewbieToNewcomer processing');
+    return res.status(200).send('Member updates processing');
   } catch (e) {
     console.error(e);
     return res.status(500).send(e.message);

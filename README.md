@@ -2,92 +2,68 @@
 
 Repository for all projects by SB Newcomers Technology committee members
 
-## Requirements
-
-- [Node.js](https://nodejs.org/en/download/) v10.5.3 or later
-- NPM v6.4.1 or later
-- [Python](https://www.python.org/downloads/) 2.7.15 or later
-- Git v2.14 or later
-
 ## Prerequisites
 
 - You \***\*_must_\*\*** have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
 - Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) \***\*_must_\*\*** be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
 
-## Linux Setup
+## Script
 
-1. Execute the following commands to install all prerequisites:
-
-   ```bash
-   yum install git
-   git --version
-   curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
-   . ~/.nvm/nvm.sh
-   nvm install 10.5.3
-   npm install -g npm@latest
-   node -v
-   npm -v
-   ```
-
-2. Execute the following commands:
-
-   ```bash
-   git clone https://github.com/rkiesler1/sbnewcomers.git
-   cd sbnewcomers/shared
-   npm install
-   ```
-
-3. Copy the file `.env_sample` to `.env`
-
-4. Edit the file `.env` and update with your SBNC login credentials:
-
-   ```ini
-   wildapricot_user_id=<your_sbnc_user_id>
-   wildapricot_password=<your_sbnc_password>
-   wildapricot_client_id=<sbniapi_client_id>
-   wildapricot_client_secret=<sbniapi_client_secret>
-   ```
-
-   The values for `wildapricot_client_id` and `wildapricot_client_secret` can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
-
-   The values for `wildapricot_account_id` and `wildapricot_scope` should not change.
-
-   <kbd style="border: 1px solid; width: 600px;">![Authorized Application](/../screenshots/application.png?raw=true 'Authorized Application')</kbd>
-
-   If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
-
-5. Copy the file `aws_sample.json` to `aws.json`
-
-6. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
-
-   ```javascript
-   {
-      "accessKeyId": "<your_aws_access_key>",
-      "secretAccessKey": "<your_aws_secret_key>",
-      "region": "us-west-2"
-   }
-   ```
-
-## Scripts
-
-- [Alumni Renewal Due Update](./AlumniRenewalDueUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who 'graduated' in the past 24 hours and set the renewal date in the database to 730 days from the previous renewal date.
-
-- [Database Update for Newbies (deprectaed)](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
-
-- [Friends of Newcomers Update](./FriendsOfNewcomersUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of FoN members who registered recently for open events and updates the renewal date for the member to avoid archiving.
-
-- [Newbie to Newcomer Update](./NewbieToNewcomerUpdate) - A Node.js script that uses the WildApricot API to execute a daily query of members who have been active in the club for more than 90 day and change their membership level from "Newbie" to "Regular".
+- [Member Updates](./memberUpdates) - A Node.js script that uses the WildApricot API to execute a daily query of members who have been active in the club for more than 90 day and change their membership level from "Newbie" to "Regular". It also finds any members in WildApricot that have passed their renewal date and changes their membership level to "Alumni"
 
 ## Scheduled Execution
 
-When using a task scheduler (e.g., `cron` on Linux) to execute scripts on a schedule, be mindful of the [WildApricot API limits](https://gethelp.wildapricot.com/en/articles/182#limits) which permit up to 60 calls per minute. Each individual script already takes that into account, but executing two or more scripts on an overlapping schedule will exceed the limits and result in API errors.
+The CRON job runs every day at 10am UTC by the [Daily CRON Github Action](.github/workflows/daily-cron-job.yaml). The Github Action sends a get request to the /memberUpdates endpoint defined in app.js. To see the CRON job history, go to the [Github Action](https://github.com/dyeoman2/sbnewcomers/actions/workflows/daily-cron-job.yaml)
 
-## Docker commands
+## Start Coding
 
-```
-docker-compose up -d --build
-```
+1. Copy the file `.env_sample` to `.env`
 
-```
-docker-compose down -v
-```
+2. Update the `.env` file using the data shown the in AWS Login Info file in the shared shared Google Drive TECH folder. The actual .env file used by the application is in S3.
+
+   ```ini
+   AWS_ACCESS_KEY_ID=<your_aws_acccess_key_id>
+   AWS_SECRET_ACCESS_KEY=<your_aws_acccess_key_secret>
+   AWS_REGION=us-east-2
+   WILDAPRICOT_USER_ID=<your_sbnc_user_id>
+   WILDAPRICOT_PASSWORD=<your_sbnc_password>
+   WILDAPRICOT_CLIENT_ID=<sbniapi_client_id>
+   WILDAPRICOT_CLIENT_SECRET=<sbniapi_client_secret>
+   WILDAPRICOT_ACCOUNT_ID=176353
+   WILDAPRICOT_SCOPE=auto
+   ```
+
+   The values for `WILDAPRICOT_CLIENT_ID` and `WILDAPRICOT_CLIENT_SECRET` can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
+
+   The values for `WILDAPRICOT_ACCOUNT_ID` and `WILDAPRICOT_SCOPE` should not change.
+
+   If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
+
+3. Run the application locally using NPM or Docker
+
+   Start locally
+
+   ```
+   npm install
+   npm start
+   ```
+
+   Start in Docker
+
+   ```
+   docker-compose up -d --build
+   ```
+
+   Stop in Docker
+
+   ```
+   docker-compose down -v
+   ```
+
+4. When you push your changes to the main branch, they are automatically deployed to the AWS ECS cluster via the [AWS Deploy Github Action](.github/workflows/aws-deploy.yml). Deployment take ~5 minutes and the progress can be tracked in the repo's [Github Actions](https://github.com/dyeoman2/sbnewcomers/actions/workflows/aws-deploy.yml) or in AWS.
+
+If you need to add or update environment vairables in the live application, you will need to update your .env locally, download the [AWS Copilot CLI](https://aws.github.io/copilot-cli/), and run `copilot deploy`. The AWS container infrastructure was setup using the AWS Copilot CLI and it is the easiest way to make updates to the application's infrastructure. The infrastructure code is located in the [copilot folder](./copilot).
+
+## WildApricot API limits
+
+Be mindful of the [WildApricot API limits](https://gethelp.wildapricot.com/en/articles/182#limits) which permit up to 60 calls per minute. Each individual script already takes that into account, but executing two or more scripts on an overlapping schedule will exceed the limits and result in API errors.
