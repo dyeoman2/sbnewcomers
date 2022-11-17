@@ -14,7 +14,7 @@ if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir);
 const bunyan = require('bunyan');
 const RotatingFileStream = require('bunyan-rotating-file-stream');
 let log = bunyan.createLogger({
-  name: 'newbie_to_newcomer',
+  name: 'membership_updates',
   streams: [
     {
       stream: process.stderr,
@@ -22,7 +22,7 @@ let log = bunyan.createLogger({
     },
     {
       stream: new RotatingFileStream({
-        path: path.join(__dirname, '.', 'logs/newbie_to_newcomer.log'),
+        path: path.join(__dirname, '.', 'logs/membership_updates.log'),
         period: '1d', // daily rotation
         totalFiles: 1000, // keep up to 1000 back copies
         rotateExisting: true, // Give ourselves a clean file when we start up, based on period
@@ -44,7 +44,7 @@ let apiClientMethods = null;
 const getContacts = (args, action) => {
   const interval = 10000;
 
-  // send the newbie query to the API
+  // send the member query to the API
   apiClientMethods.listContacts(args, (contactData, response) => {
     if (!_.isNil(contactData) && !_.isNil(contactData.State)) {
       // good response
@@ -114,7 +114,7 @@ const getContacts = (args, action) => {
 };
 
 // allowable actions
-const actions = ['newbieToNewcomerUpdate'];
+const actions = ['newbieToNewcomerUpdate', 'makeAlumniUpdate'];
 let processed = 0;
 let updated = 0;
 let skipped = 0;
@@ -193,22 +193,28 @@ const processContact = (contact, index, callback) => {
 /*************************
  * Process member records *
  *************************/
-const processContacts = (newbies, action) => {
+const processContacts = (members, action) => {
   if (actions.indexOf(action) < 0) {
     throw new Error(util.format('Unsupported action (%s)', action));
   }
 
-  log.info('%d newbies to process', newbies.length);
+  log.info('%d members to process', members.length);
 
-  // For each newbie, prepare payload with updated membership level
-  const newbieRecords = newbies.map((newbie) => {
-    const { Id: id, FirstName: firstName, LastName: lastName } = newbie;
-    const isVUUser = newbie.MembershipLevel.Name.includes('VU');
-    const membershipLevel = isVUUser ? 'NewcomerMember VU' : 'NewcomerMember';
+  // For each member, prepare payload with updated membership level
+  const memberRecords = members.map((member) => {
+    const { Id: id, FirstName: firstName, LastName: lastName } = member;
+    const currentMembershipLevel = member.MembershipLevel.Name;
+    const isNewbie = currentMembershipLevel.includes('Newbie');
+    let membershipLevel = isNewbie ? 'NewcomerMember' : 'Alumni';
+    const isVUUser = currentMembershipLevel.includes('VU');
+    if (isVUUser) membershipLevel = membershipLevel + ' VU';
     const membershipLevelId = lookupMembershipLevel(membershipLevel);
-    const membershipStatusSysCode = newbie.FieldValues.filter((field) => {
+    const membershipStatusSysCode = member.FieldValues.filter((field) => {
       return field.FieldName == 'Membership status';
     })[0].SystemCode;
+    const subject = isNewbie
+      ? 'Newbie to Newcomer Updates'
+      : 'Alumni Updates - ' + currentMembershipLevel;
 
     return {
       action: action,
@@ -216,19 +222,21 @@ const processContacts = (newbies, action) => {
       membershipLevelId,
       membershipStatusSysCode,
       status: 'Active',
+      subject,
       firstName,
       lastName,
       id,
     };
   });
 
-  console.log('newbieRecords', newbieRecords);
+  console.log('memberRecords length', memberRecords.length);
+  console.log('memberRecords', memberRecords);
 
-  if (newbieRecords.length) {
+  if (memberRecords.length) {
     // Process each contact record
-    async.eachOfSeries(newbieRecords, processContact, (err) => {
+    async.eachOfSeries(memberRecords, processContact, (err) => {
       if (err) log.error(err);
-      else sendEmail({ action, errors, log, newbieRecords, processed, skipped, updated });
+      else sendEmail({ action, errors, log, memberRecords, processed, skipped, updated });
     });
   }
 
@@ -246,6 +254,9 @@ process.on('uncaughtException', (err) => log.error(1, `${err}`));
 const today = new Date();
 today.setDate(today.getDate() + 641);
 const todayPlus640 = today.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
+const today2 = new Date();
+today2.setDate(today2.getDate() + 15);
+const todayPlus15 = today2.toISOString().substring(0, 10); // keep the yyyy-mm-dd portion
 console.log('Today + 640 days: ' + todayPlus640);
 
 /****************************
@@ -294,11 +305,40 @@ module.exports = {
             },
           });
 
+          const alumniArgs = (membershipLevel) => ({
+            path: { accountId: accountId },
+            parameters: {
+              $select:
+                "'First name','Last name','Membership status','Membership enabled','Member since', 'Renewal due",
+              $filter:
+                "'Membership status' eq 'Active'" +
+                " AND 'Membership level ID' eq " +
+                lookupMembershipLevel(membershipLevel) +
+                " AND 'Renewal due' lt '" +
+                todayPlus15 +
+                "'",
+            },
+          });
+
           const membershipLevels = ['NewbieNewcomer', 'NewbieNewcomer VU'];
 
+          // Convert applicable Newbies to Newcomers
           membershipLevels.forEach((level) => {
             const args = newbieArgs(level);
             getContacts(args, 'newbieToNewcomerUpdate', apiClientMethods);
+          });
+
+          const alumniMembershipLevels = [
+            'ExtendedNewcomer',
+            'ExtendedNewcomer VU',
+            'NewcomerMember',
+            'NewcomerMember VU',
+          ];
+
+          // Convert applicable members to Alumni
+          alumniMembershipLevels.forEach((level) => {
+            const args = alumniArgs(level);
+            getContacts(args, 'makeAlumniUpdate', apiClientMethods);
           });
         }
       }

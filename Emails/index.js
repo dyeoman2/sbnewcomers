@@ -11,12 +11,13 @@ const emailTo = 'dysbnewcomers@gmail.com';
 const emailFrom = 'webmaster5@sbnewcomers.org';
 
 // Send email with results of updated membership
-const sendEmail = async ({ action, errors, log, newbieRecords, processed, skipped, updated }) => {
+const sendEmail = async ({ action, errors, log, memberRecords, processed, skipped, updated }) => {
+  const subject = memberRecords[0].subject;
   // Create sendEmail params
   let listText,
     contact = '';
   let listHtml = '<ul>';
-  newbieRecords.map((record) => {
+  memberRecords.map((record) => {
     contact = util.format('%s %s (%d)', record.firstName, record.lastName, record.id);
     listText += '\n' + contact;
     listHtml += '<li>' + contact + '</li>';
@@ -31,7 +32,7 @@ const sendEmail = async ({ action, errors, log, newbieRecords, processed, skippe
         Html: {
           Charset: 'UTF-8',
           Data: util.format(
-            '%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s %s',
+            '%s processed for %d member%s with %d updated, %d skipped, and %d error%s %s',
             action,
             processed,
             processed > 1 ? 's' : processed == 1 ? '' : 's',
@@ -45,7 +46,7 @@ const sendEmail = async ({ action, errors, log, newbieRecords, processed, skippe
         Text: {
           Charset: 'UTF-8',
           Data: util.format(
-            '%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s\n%s',
+            '%s processed for %d members%s with %d updated, %d skipped, and %d error%s\n%s',
             action,
             processed,
             processed > 1 ? 's' : processed == 1 ? '' : 's',
@@ -59,7 +60,7 @@ const sendEmail = async ({ action, errors, log, newbieRecords, processed, skippe
       },
       Subject: {
         Charset: 'UTF-8',
-        Data: util.format('%sNewbie to Newcomer update', errors > 0 ? '*** ERRORS: ' : ''),
+        Data: util.format('%s' + subject, errors > 0 ? '*** ERRORS: ' : ''),
       },
     },
     Source: emailFrom,
@@ -69,7 +70,7 @@ const sendEmail = async ({ action, errors, log, newbieRecords, processed, skippe
   // Create the promise and SES service object
   const sendPromise = new aws.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
   log.info(
-    '%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s',
+    '%s processed for %d member%s with %d updated, %d skipped, and %d error%s',
     action,
     processed,
     processed > 1 ? 's' : processed == 1 ? '' : 's',
@@ -81,13 +82,13 @@ const sendEmail = async ({ action, errors, log, newbieRecords, processed, skippe
 
   // Handle promise's fulfilled/rejected states
   sendPromise
-    .then(function (data) {
+    .then((data) => {
       // reset counters
       processed = 0;
       errors = 0;
       //console.log(data.MessageId);
     })
-    .catch(function (err) {
+    .catch((err) => {
       console.error(err, err.stack);
     });
 };
