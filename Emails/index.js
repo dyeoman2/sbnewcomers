@@ -4,6 +4,7 @@ const { ses } = require('../lib/aws');
 // configure mail
 const emailTo = process.env.EMAIL_TO;
 const emailFrom = process.env.EMAIL_FROM;
+const emailCc = process.env.EMAIL_CC;
 
 // Send email with results of updated membership
 const sendEmail = async ({ action, errors, log, memberRecords, processed, skipped, updated }) => {
@@ -18,39 +19,33 @@ const sendEmail = async ({ action, errors, log, memberRecords, processed, skippe
     listHtml += '<li>' + contact + '</li>';
   });
 
+  const newbieText = `The Newbie members below were automatically updated to Newcomer members in WildApricot because they have been members for more than ninety days.`;
+  const alumniText = `The members below were automatically updated to Alumni members in WildApricot because their renewal date was less than the current date. If you think one of the members below should not be an Alumni, please update their profile in WildApricot and make sure to update their renewal date to some point in the future.`;
+
+  const isNewbie = action === 'newbieToNewcomerUpdate';
+  const introText = isNewbie ? newbieText : alumniText;
+
+  const techTextHtml =
+    'More details about this automated process are located in Google Drive "TECH > 3RD PARTY INFO > AWS Login Info (Custom Code Scripts).docx" and in the <a href="https://github.com/dyeoman2/sbnewcomers" target="_blank">Github Repository</a>.';
+  const techText =
+    'More details about this automated process are located in Google Drive "TECH > 3RD PARTY INFO > AWS Login Info (Custom Code Scripts).docx" and in the Github Repository https://github.com/dyeoman2/sbnewcomers.';
+  const helpText =
+    'If you run into any issues with this process, please contact the SB Newcomers Tech Team or Daniel Yeoman at dyeoman2@gmail.com';
+
   const params = {
     Destination: {
       ToAddresses: [emailTo],
+      CcAddresses: [emailCc],
     },
     Message: {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: util.format(
-            '%s processed for %d member%s with %d updated, %d skipped, and %d error%s %s',
-            action,
-            processed,
-            processed > 1 ? 's' : processed == 1 ? '' : 's',
-            updated,
-            skipped,
-            errors,
-            errors == 1 ? '' : 's',
-            listHtml
-          ),
+          Data: `${introText}\n${listHtml}</ul><p>${techTextHtml}</p><br><p>${helpText}</p>`,
         },
         Text: {
           Charset: 'UTF-8',
-          Data: util.format(
-            '%s processed for %d members%s with %d updated, %d skipped, and %d error%s\n%s',
-            action,
-            processed,
-            processed > 1 ? 's' : processed == 1 ? '' : 's',
-            updated,
-            skipped,
-            errors,
-            errors == 1 ? '' : 's',
-            listText
-          ),
+          Data: `${introText}\n${listText}\n${techText}\n${helpText}`,
         },
       },
       Subject: {

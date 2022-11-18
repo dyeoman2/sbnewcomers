@@ -155,7 +155,7 @@ const processContact = (contact, index, callback) => {
   /*****************************
    * Update the contact record *
    *****************************/
-  apiClient.methods.updateContact(levelUpdateArgs, (contactDataUpd, response) => {
+  apiClientMethods.updateContact(levelUpdateArgs, (contactDataUpd, response) => {
     if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
       updated++;
       log.trace(
