@@ -41,7 +41,7 @@ const sendEmail = async ({ action, errors, log, memberRecords, processed, skippe
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: `${introText}\n${listHtml}</ul><p>${techTextHtml}</p><br><p>${helpText}</p>`,
+          Data: `${introText}\n${listHtml}</ul><p>${techTextHtml}</p><p>${helpText}</p>`,
         },
         Text: {
           Charset: 'UTF-8',
