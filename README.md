@@ -13,7 +13,7 @@ Repository for all projects by SB Newcomers Technology committee members
 
 ## Scheduled Execution
 
-The CRON job runs every day at 10am UTC by the [Daily CRON Github Action](.github/workflows/daily-cron-job.yaml). The Github Action sends a get request to the /memberUpdates endpoint defined in app.js. To see the CRON job history, go to the [Github Action](https://github.com/dyeoman2/sbnewcomers/actions/workflows/daily-cron-job.yaml)
+The CRON job runs every day at 10am UTC via this [Lambda Function that is configured with EventBridge](https://us-east-2.console.aws.amazon.com/lambda/home?region=us-east-2#/functions/wildApricotDailyCronJobTrigger?tab=code). The Github Action sends a get request to the /memberUpdates endpoint defined in app.js. To see the CRON job history, go to the [CloudWatch Logs](https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/%2Faws%2Flambda%2FwildApricotDailyCronJobTrigger)
 
 ## Start Coding
 
