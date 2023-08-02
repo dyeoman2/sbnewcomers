@@ -152,6 +152,7 @@ const processContact = (contact, index, callback) => {
       MembershipLevel: {
         Id: contact.membershipLevelId,
       },
+      Archived: contact.isArchived,
     },
   };
   /*****************************
@@ -207,13 +208,12 @@ const processContacts = (members, action) => {
     const { Id: id, FirstName: firstName, LastName: lastName } = member;
     const currentMembershipLevel = member.MembershipLevel.Name;
     const isNewbie = currentMembershipLevel.includes("Newbie");
-    let membershipLevel = isNewbie ? "NewcomerMember" : "Alumni";
-    const isVUUser = currentMembershipLevel.includes("VU");
-    if (isVUUser) membershipLevel = membershipLevel + " VU";
+    const membershipLevel = isNewbie ? "NewcomerMember" : "Alumni";
     const membershipLevelId = lookupMembershipLevel(membershipLevel);
     const membershipStatusSysCode = member.FieldValues.filter((field) => {
       return field.FieldName == "Membership status";
     })[0].SystemCode;
+    const isArchived = membershipLevel == "Alumni";
     const subject = isNewbie
       ? "Newbie to Newcomer Updates"
       : "Alumni Updates - " + currentMembershipLevel;
@@ -228,6 +228,7 @@ const processContacts = (members, action) => {
       firstName,
       lastName,
       id,
+      isArchived,
     };
   });
 
@@ -298,9 +299,7 @@ module.exports = {
 
             const alumniMembershipLevels = [
               "ExtendedNewcomer",
-              "ExtendedNewcomer VU",
               "NewcomerMember",
-              "NewcomerMember VU",
             ];
 
             const alumniArgs = (membershipLevel) => ({
@@ -368,11 +367,14 @@ module.exports = {
               },
             });
 
-            const membershipLevels = ["NewbieNewcomer", "NewbieNewcomer VU"];
+            console.log("newbieArgs", newbieArgs);
+
+            const membershipLevels = ["NewbieNewcomer"];
 
             // Convert applicable Newbies to Newcomers
             membershipLevels.forEach((level) => {
               const args = newbieArgs(level);
+              console.log("args", args);
               getContacts(args, "newbieToNewcomerUpdate", apiClientMethods);
             });
           }
