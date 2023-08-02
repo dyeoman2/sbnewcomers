@@ -67,6 +67,7 @@ token.json
 # AWS credentials
 aws.json
 aws.rkiesler.json
+.aws/credentials
 
 # next.js build output
 .next
